@@ -38,14 +38,14 @@ namespace Tournament.API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<TournamentModel>> GetTournament(int id)
         {
-            var tournament = await _context.Tournaments.FindAsync(id);
+            var tournament = await _tournamentRepository.GetAsync(id);
 
             if (tournament == null)
             {
                 return NotFound();
             }
 
-            return tournament;
+            return Ok(tournament);
         }
 
         // PUT: api/Tournaments/5

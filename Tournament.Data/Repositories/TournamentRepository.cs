@@ -20,9 +20,9 @@ namespace Tournament.Data.Repositories
             return await _context.Tournaments.Include(t => t.Games).ToListAsync();
         }
 
-        public void Add(TournamentModel tournament)
+        public async Task<TournamentModel> GetAsync(int id)
         {
-            throw new NotImplementedException();
+            return await _context.Tournaments.FindAsync(id);
         }
 
         public Task<bool> AnyAsync(int id)
@@ -30,12 +30,16 @@ namespace Tournament.Data.Repositories
             throw new NotImplementedException();
         }
 
-       
 
-        public Task<TournamentModel> GetAsync(int id)
+        public void Add(TournamentModel tournament)
         {
             throw new NotImplementedException();
         }
+
+       
+       
+
+      
 
         public void Remove(TournamentModel tournament)
         {
