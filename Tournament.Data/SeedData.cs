@@ -39,8 +39,8 @@ namespace Tournament.Data
             var fakerGame = new Faker<Game>()
                 .RuleFor(g => g.Title, f => f.Commerce.ProductName())  // Random game name
                 .RuleFor(g => g.Description, f => f.Lorem.Sentence())  // Random description
-                .RuleFor(g => g.Time, f => f.Date.Future())           // Random future game time
-                .RuleFor(g => g.TournamentId, f => f.Random.Int());   // Random TournamentId
+                .RuleFor(g => g.Time, f => f.Date.Future());           // Random future game time
+               
 
             return fakerGame.Generate(count);  // Generate the specified number of games
         }

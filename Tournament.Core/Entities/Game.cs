@@ -14,6 +14,6 @@ namespace Tournament.Core.Entities
         public string Description { get; set; }
 
         // FK
-       public int TournamentId { get; set; }
+       public int TournamentModelId { get; set; }
     }
 }
