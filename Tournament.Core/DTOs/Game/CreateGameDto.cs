@@ -1,4 +1,4 @@
-﻿namespace Tournament.API.DTOs.Game
+﻿namespace Tournament.Core.DTOs.Game
 {
     public class CreateGameDto
     {

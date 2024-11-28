@@ -2,7 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Tournament.Data.Data;
 using Tournament.Core.Entities;
-using Tournament.API.DTOs.Game;
+using Tournament.Core.DTOs.Game;
+using AutoMapper;
 
 namespace Tournament.API.Controllers
 {
@@ -11,10 +12,12 @@ namespace Tournament.API.Controllers
     public class GamesController : ControllerBase
     {
         private readonly TournamentContext _context;
+        private readonly IMapper _mapper;
 
-        public GamesController(TournamentContext context)
+        public GamesController(TournamentContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/Games
@@ -74,13 +77,15 @@ namespace Tournament.API.Controllers
         [HttpPost]
         public async Task<ActionResult<Game>> PostGame(CreateGameDto createGameDto)
         {
-            var game = new Game
-            {
-                Title = createGameDto.Title,
-                Time = createGameDto.Time,
-                Description = createGameDto.Description,
-                TournamentModelId = createGameDto.TournamentModelId
-            };
+            //var game = new Game
+            //{
+            //    Title = createGameDto.Title,
+            //    Time = createGameDto.Time,
+            //    Description = createGameDto.Description,
+            //    TournamentModelId = createGameDto.TournamentModelId
+            //};
+
+            var game = _mapper.Map<Game>(createGameDto);
 
             _context.Games.Add(game);
             await _context.SaveChangesAsync();

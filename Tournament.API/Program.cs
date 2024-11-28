@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Tournament.API.Extention;
+using Tournament.Data;
 using Tournament.Data.Data;
 
 namespace Tournament.API
@@ -18,6 +19,8 @@ namespace Tournament.API
             builder.Services.AddControllers(opt => opt.ReturnHttpNotAcceptable = true)
                 .AddNewtonsoftJson()
                 .AddXmlDataContractSerializerFormatters();
+
+            builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
