@@ -21,6 +21,7 @@ namespace Tournament.API
             builder.Services.AddControllers(opt => opt.ReturnHttpNotAcceptable = true)
                 .AddNewtonsoftJson()
                 .AddXmlDataContractSerializerFormatters();
+
             builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
             builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 

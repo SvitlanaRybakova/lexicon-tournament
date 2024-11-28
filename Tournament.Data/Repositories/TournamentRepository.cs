@@ -45,7 +45,7 @@ namespace Tournament.Data.Repositories
 
         public void Update(TournamentModel tournament)
         {
-            throw new NotImplementedException();
+            _context.Tournaments.Update(tournament);
         }
     }
 }

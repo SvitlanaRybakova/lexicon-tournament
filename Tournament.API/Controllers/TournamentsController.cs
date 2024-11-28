@@ -30,7 +30,7 @@ namespace Tournament.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TournamentModel>>> GetTournament()
         {
-           var tournaments =  await _tournamentRepository.GetAllAsync();
+            var tournaments = await _tournamentRepository.GetAllAsync();
             return Ok(tournaments);
         }
 
@@ -57,22 +57,19 @@ namespace Tournament.API.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(tournament).State = EntityState.Modified;
+            if (!await _tournamentRepository.AnyAsync(id))
+            {
+                return NotFound();
+            }
 
             try
             {
+                _tournamentRepository.Update(tournament);
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await _tournamentRepository.AnyAsync(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
 
             return NoContent();
@@ -104,12 +101,12 @@ namespace Tournament.API.Controllers
                 return NotFound();
             }
 
-           _tournamentRepository.Remove(tournament);
+            _tournamentRepository.Remove(tournament);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        
+
     }
 }
