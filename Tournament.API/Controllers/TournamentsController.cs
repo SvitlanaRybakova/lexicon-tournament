@@ -6,27 +6,32 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Tournament.Data.Data;
+using Tournament.Data.Repositories;
 
 using Tournament.Core.Entities;
+using Tournament.Core.Repositories;
 
 namespace Tournament.API.Controllers
 {
-    [Route("api/Tournament")]
+    [Route("api/Tournaments")]
     [ApiController]
     public class TournamentsController : ControllerBase
     {
         private readonly TournamentContext _context;
+        private readonly ITournamentRepository _tournamentRepository;
 
-        public TournamentsController(TournamentContext context)
+        public TournamentsController(TournamentContext context, ITournamentRepository tournamentRepository)
         {
             _context = context;
+            _tournamentRepository = tournamentRepository;
         }
 
         // GET: api/Tournaments
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TournamentModel>>> GetTournament()
         {
-            return await _context.Tournaments.ToListAsync();
+           var tournaments =  await _tournamentRepository.GetAllAsync();
+            return Ok(tournaments);
         }
 
         // GET: api/Tournaments/5
