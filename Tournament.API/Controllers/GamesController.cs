@@ -2,10 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using Tournament.Data.Data;
 using Tournament.Core.Entities;
+using Tournament.API.DTOs.Game;
 
 namespace Tournament.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/Games")]
     [ApiController]
     public class GamesController : ControllerBase
     {
@@ -71,13 +72,22 @@ namespace Tournament.API.Controllers
         // POST: api/Games
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Game>> PostGame(Game game)
+        public async Task<ActionResult<Game>> PostGame(CreateGameDto createGameDto)
         {
+            var game = new Game
+            {
+                Title = createGameDto.Title,
+                Time = createGameDto.Time,
+                Description = createGameDto.Description,
+                TournamentModelId = createGameDto.TournamentModelId
+            };
+
             _context.Games.Add(game);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetGame", new { id = game.Id }, game);
         }
+
 
         // DELETE: api/Games/5
         [HttpDelete("{id}")]
