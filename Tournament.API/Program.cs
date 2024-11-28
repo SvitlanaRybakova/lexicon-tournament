@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Tournament.API.Extention;
 using Tournament.Core.Repositories;
 using Tournament.Data;
@@ -23,6 +22,7 @@ namespace Tournament.API
                 .AddXmlDataContractSerializerFormatters();
 
             builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
+            builder.Services.AddScoped<IGameRepository, GameRepository>();
             builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

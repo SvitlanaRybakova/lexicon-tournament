@@ -4,6 +4,8 @@ using Tournament.Data.Data;
 using Tournament.Core.Entities;
 using Tournament.Core.DTOs.Game;
 using AutoMapper;
+using Tournament.Core.Repositories;
+using Tournament.Data.Repositories;
 
 namespace Tournament.API.Controllers
 {
@@ -13,32 +15,34 @@ namespace Tournament.API.Controllers
     {
         private readonly TournamentContext _context;
         private readonly IMapper _mapper;
+        private readonly IGameRepository _gameRepository;
 
-        public GamesController(TournamentContext context, IMapper mapper)
+        public GamesController(TournamentContext context, IMapper mapper, IGameRepository gameRepository)
         {
             _context = context;
             _mapper = mapper;
+            _gameRepository = gameRepository;
         }
 
         // GET: api/Games
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Game>>> GetGame()
         {
-            return await _context.Games.ToListAsync();
+            var games = await _gameRepository.GetAllAsync();
+            return Ok(games);
         }
 
         // GET: api/Games/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Game>> GetGame(int id)
         {
-            var game = await _context.Games.FindAsync(id);
-
-            if (game == null)
+            if (!await _gameRepository.AnyAsync(id))
             {
                 return NotFound();
             }
 
-            return game;
+            var game = await _gameRepository.GetAsync(id);
+            return Ok(game);
         }
 
         // PUT: api/Games/5
@@ -51,22 +55,19 @@ namespace Tournament.API.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(game).State = EntityState.Modified;
+            if (!await _gameRepository.AnyAsync(id))
+            {
+                return NotFound();
+            }
 
             try
             {
+                _gameRepository.Update(game);
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!GameExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
 
             return NoContent();
@@ -77,6 +78,7 @@ namespace Tournament.API.Controllers
         [HttpPost]
         public async Task<ActionResult<Game>> PostGame(CreateGameDto createGameDto)
         {
+           
             //var game = new Game
             //{
             //    Title = createGameDto.Title,
@@ -87,7 +89,12 @@ namespace Tournament.API.Controllers
 
             var game = _mapper.Map<Game>(createGameDto);
 
-            _context.Games.Add(game);
+            if (await _gameRepository.AnyAsync(game.Id))
+            {
+                return Conflict("A tournament with this ID already exists.");
+            }
+
+            _gameRepository.Add(game);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetGame", new { id = game.Id }, game);
@@ -98,21 +105,16 @@ namespace Tournament.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGame(int id)
         {
-            var game = await _context.Games.FindAsync(id);
+            var game = await _gameRepository.GetAsync(id);
             if (game == null)
             {
                 return NotFound();
             }
 
-            _context.Games.Remove(game);
+            _gameRepository.Remove(game);
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool GameExists(int id)
-        {
-            return _context.Games.Any(e => e.Id == id);
         }
     }
 }
