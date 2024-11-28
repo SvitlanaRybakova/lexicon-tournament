@@ -22,28 +22,25 @@ namespace Tournament.Data.Repositories
 
         public async Task<TournamentModel> GetAsync(int id)
         {
-            return await _context.Tournaments.FindAsync(id);
+            return await _context.Tournaments
+                         .Include(t => t.Games)
+                         .FirstOrDefaultAsync(t => t.Id == id);
         }
 
-        public Task<bool> AnyAsync(int id)
+        public async Task<bool> AnyAsync(int id)
         {
-            throw new NotImplementedException();
+            return await _context.Tournaments.AnyAsync(t => t.Id == id);
         }
 
 
         public void Add(TournamentModel tournament)
         {
-            throw new NotImplementedException();
+              _context.Tournaments.Add(tournament);
         }
-
-       
-       
-
-      
 
         public void Remove(TournamentModel tournament)
         {
-            throw new NotImplementedException();
+            _context.Tournaments.Remove(tournament);
         }
 
         public void Update(TournamentModel tournament)
