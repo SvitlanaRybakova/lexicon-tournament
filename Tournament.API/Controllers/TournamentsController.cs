@@ -5,6 +5,7 @@ using Tournament.Core.Entities;
 using Tournament.Core.Repositories;
 using AutoMapper;
 using Tournament.Core.DTOs.Tournament;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace Tournament.API.Controllers
 {
@@ -13,8 +14,8 @@ namespace Tournament.API.Controllers
     public class TournamentsController : ControllerBase
     {
         private readonly TournamentContext _context;
-      
-       // private readonly ITournamentRepository _tournamentRepository;
+
+        // private readonly ITournamentRepository _tournamentRepository;
 
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
@@ -24,8 +25,8 @@ namespace Tournament.API.Controllers
             _context = context;
             _uow = uow;
             _mapper = mapper;
-        // _tournamentRepository = tournamentRepository;
-    }
+            // _tournamentRepository = tournamentRepository;
+        }
 
         // GET: api/Tournaments
         [HttpGet]
@@ -57,10 +58,10 @@ namespace Tournament.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTournament(int id, CreateTournamentDto createTournamentDto)
         {
-            if (!await _uow.TournamentRepository.AnyAsync(id))
-            {
-                return NotFound();
-            }
+            if (!await _uow.TournamentRepository.AnyAsync(id)) return NotFound();
+
+
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var tournament = await _uow.TournamentRepository.GetAsync(id);
             _mapper.Map(createTournamentDto, tournament);
@@ -72,6 +73,7 @@ namespace Tournament.API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
+                return StatusCode(500, "An error occurred while updating the tournament.");
                 throw;
             }
 
@@ -83,9 +85,20 @@ namespace Tournament.API.Controllers
         [HttpPost]
         public async Task<ActionResult<TournamentModel>> PostTournament(CreateTournamentDto createTournamentDto)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
             var tournament = _mapper.Map<TournamentModel>(createTournamentDto);
-            _uow.TournamentRepository.Add(tournament);
-            await _uow.SaveAsync();
+
+            try
+            {
+                _uow.TournamentRepository.Add(tournament);
+                await _uow.SaveAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return StatusCode(500, "An error occurred while saving the tournament.");
+                throw;
+            }
 
             var tournamentDto = _mapper.Map<TournamentDto>(tournament);
             return CreatedAtAction(nameof(GetTournament), new { id = tournament.Id }, tournamentDto);
@@ -96,16 +109,58 @@ namespace Tournament.API.Controllers
         public async Task<IActionResult> DeleteTournament(int id)
         {
             var tournament = await _uow.TournamentRepository.GetAsync(id);
-            if (tournament == null)
+            if (tournament == null) return NotFound();
+            try
             {
-                return NotFound();
+                _uow.TournamentRepository.Remove(tournament);
+                await _uow.SaveAsync();
+
+                return NoContent();
             }
-
-            _uow.TournamentRepository.Remove(tournament);
-            await _uow.SaveAsync();
-
-            return NoContent();
+            catch (DbUpdateConcurrencyException)
+            {
+                return StatusCode(500, "An error occurred while deleting the tournament.");
+            }
         }
+
+        // Patch api/Tournaments/5
+        [HttpPatch("{id:int}")]
+        public async Task<ActionResult> PatchTournament(int id, JsonPatchDocument<CreateTournamentDto> patchDocument)
+        {
+            if (patchDocument is null)
+                return BadRequest("No patch document provided.");
+
+            if (!await _uow.TournamentRepository.AnyAsync(id))
+                return NotFound("The tournament does not exist in the database.");
+
+            try
+            {
+                var tournamentModel = await _uow.TournamentRepository.GetAsync(id);
+
+          
+                var dto = _mapper.Map<CreateTournamentDto>(tournamentModel);
+
+             
+                patchDocument.ApplyTo(dto, ModelState);
+
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                
+                _mapper.Map(dto, tournamentModel);
+
+                await _uow.SaveAsync();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("EXCEPTION: " + ex.ToString());
+                return StatusCode(500, "An error occurred while processing the request.");
+            }
+        }
+
+
 
 
     }

@@ -47,5 +47,7 @@ namespace Tournament.Data.Repositories
         {
             _context.Tournaments.Update(tournament);
         }
+
     }
+
 }

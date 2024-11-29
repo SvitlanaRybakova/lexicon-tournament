@@ -55,10 +55,11 @@ namespace Tournament.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutGame(int id, CreateGameDto createGameDto)
         {
-            if (!await _uow.GameRepository.AnyAsync(id))
-            {
-                return NotFound();
-            }
+            if (!await _uow.GameRepository.AnyAsync(id)) return NotFound();
+
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+
 
             var game = await _uow.GameRepository.GetAsync(id);
             _mapper.Map(createGameDto, game);
@@ -81,7 +82,7 @@ namespace Tournament.API.Controllers
         [HttpPost]
         public async Task<ActionResult<GameDto>> PostGame(CreateGameDto createGameDto)
         {
-           
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             //var game = new Game
             //{
             //    Title = createGameDto.Title,
@@ -97,8 +98,17 @@ namespace Tournament.API.Controllers
                 return Conflict("A tournament with this ID already exists.");
             }
 
-            _uow.GameRepository.Add(game);
-            await _uow.SaveAsync();
+            try
+            {
+                _uow.GameRepository.Add(game);
+                await _uow.SaveAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return StatusCode(500, "An error occurred while saving the tournament.");
+                throw;
+            }
+
 
             var gameDto = _mapper.Map<GameDto>(game);
 
@@ -111,15 +121,21 @@ namespace Tournament.API.Controllers
         public async Task<IActionResult> DeleteGame(int id)
         {
             var game = await _uow.GameRepository.GetAsync(id);
-            if (game == null)
+            if (game == null) return NotFound();
+            try
             {
-                return NotFound();
+                _uow.GameRepository.Remove(game);
+                await _uow.SaveAsync();
+
+                return NoContent();
+
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return StatusCode(500, "An error occurred while deleting the game.");
             }
 
-            _uow.GameRepository.Remove(game);
-            await _uow.SaveAsync();
 
-            return NoContent();
         }
     }
 }

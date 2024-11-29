@@ -25,7 +25,15 @@ namespace Tournament.Data
 
             // dto => model
             CreateMap<CreateTournamentDto, TournamentModel>();
-        }
+
+            CreateMap<TournamentModel, CreateTournamentDto>()
+            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate));
+            // .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate));
+
+            CreateMap<CreateTournamentDto, TournamentModel>()
+                .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate));
+               // .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate));
+    }
 
     }
 }
