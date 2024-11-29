@@ -23,6 +23,8 @@ namespace Tournament.API
 
             builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();
             builder.Services.AddScoped<IGameRepository, GameRepository>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
             builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
