@@ -19,6 +19,10 @@ namespace Tournament.Data
             CreateMap<Game, CreateGameDto>();
             CreateMap<CreateGameDto, Game>();
 
+            CreateMap<Game, GameDto>();
+            CreateMap<GameDto, Game>();
+
+
             // model => dto (+ end date property)
             CreateMap<TournamentModel, TournamentDto>()
                 .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.StartDate.AddMonths(3)));
@@ -28,11 +32,9 @@ namespace Tournament.Data
 
             CreateMap<TournamentModel, CreateTournamentDto>()
             .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate));
-            // .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate));
 
             CreateMap<CreateTournamentDto, TournamentModel>()
-                .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate));
-               // .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate));
+            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate));
     }
 
     }

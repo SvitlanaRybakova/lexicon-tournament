@@ -128,19 +128,15 @@ namespace Tournament.API.Controllers
         public async Task<ActionResult> PatchTournament(int id, JsonPatchDocument<CreateTournamentDto> patchDocument)
         {
             if (patchDocument is null)
-                return BadRequest("No patch document provided.");
+                return BadRequest("No patch document");
 
             if (!await _uow.TournamentRepository.AnyAsync(id))
-                return NotFound("The tournament does not exist in the database.");
+                return NotFound("The tournament does not exist in the database");
 
             try
             {
                 var tournamentModel = await _uow.TournamentRepository.GetAsync(id);
-
-          
                 var dto = _mapper.Map<CreateTournamentDto>(tournamentModel);
-
-             
                 patchDocument.ApplyTo(dto, ModelState);
 
                 if (!ModelState.IsValid)
@@ -159,9 +155,5 @@ namespace Tournament.API.Controllers
                 return StatusCode(500, "An error occurred while processing the request.");
             }
         }
-
-
-
-
     }
 }

@@ -5,6 +5,8 @@ using Tournament.Core.Entities;
 using Tournament.Core.DTOs.Game;
 using AutoMapper;
 using Tournament.Core.Repositories;
+using Microsoft.AspNetCore.JsonPatch;
+using Tournament.Core.DTOs.Tournament;
 
 namespace Tournament.API.Controllers
 {
@@ -134,8 +136,43 @@ namespace Tournament.API.Controllers
             {
                 return StatusCode(500, "An error occurred while deleting the game.");
             }
+        }
 
+
+            // Patch api/Games/5
+            [HttpPatch("{id:int}")]
+            public async Task<ActionResult> PatchGame(int id, JsonPatchDocument<CreateGameDto> patchDocument)
+            {
+                if (patchDocument is null)
+                    return BadRequest("No patch document");
+
+                if (!await _uow.GameRepository.AnyAsync(id))
+                    return NotFound("The tournament does not exist in the database");
+
+                try
+                {
+                    var gameModel = await _uow.GameRepository.GetAsync(id);
+
+                    var dto = _mapper.Map<CreateGameDto>(gameModel);
+                    patchDocument.ApplyTo(dto, ModelState);
+
+                    if (!ModelState.IsValid)
+                        return BadRequest(ModelState);
+
+
+                    _mapper.Map(dto, gameModel);
+
+                    await _uow.SaveAsync();
+
+                    return NoContent();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("EXCEPTION: " + ex.ToString());
+                    return StatusCode(500, "An error occurred while processing the request.");
+                }
+            }
 
         }
-    }
 }
+
