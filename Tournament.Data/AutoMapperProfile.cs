@@ -16,7 +16,7 @@ namespace Tournament.Data
     {
         public AutoMapperProfile()
         {
-            //CreateMap<Game, CreateGameDto>();
+            CreateMap<Game, CreateGameDto>();
             CreateMap<CreateGameDto, Game>();
 
             // model => dto (+ end date property)
