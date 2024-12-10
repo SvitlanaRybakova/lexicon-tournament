@@ -10,6 +10,6 @@ namespace Tournament.Contracts
         Task PostTournament(TournamentDto dto);
         Task PutTournament(int id, TournamentDto dto);
         Task DeleteTournament(int id);
-        Task PatchTorunament(int id, JsonPatchDocument<TournamentDto> patchDocument);
+        Task PatchTournament(int id, JsonPatchDocument<TournamentDto> patchDocument);
     }
 }

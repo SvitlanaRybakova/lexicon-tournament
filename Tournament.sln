@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tournament.Presentation", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tournament.Services", "Tournament.Services\Tournament.Services.csproj", "{DDC09E12-7093-48EA-94F7-7F03766861F0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tournament.Shared", "Tournament.Shared\Tournament.Shared.csproj", "{1AB97246-4F5D-411C-8B55-FC5FB7E68363}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{DDC09E12-7093-48EA-94F7-7F03766861F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DDC09E12-7093-48EA-94F7-7F03766861F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DDC09E12-7093-48EA-94F7-7F03766861F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AB97246-4F5D-411C-8B55-FC5FB7E68363}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AB97246-4F5D-411C-8B55-FC5FB7E68363}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1AB97246-4F5D-411C-8B55-FC5FB7E68363}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1AB97246-4F5D-411C-8B55-FC5FB7E68363}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
