@@ -1,178 +1,96 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Tournament.Data.Data;
-using Tournament.Core.Entities;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
+using Tournament.Contracts;
 using Tournament.Core.DTOs.Game;
-using AutoMapper;
-using Tournament.Core.Repositories;
-using Microsoft.AspNetCore.JsonPatch;
-using Tournament.Core.DTOs.Tournament;
 
-namespace Tournament.Presentation.Controllers
+[Route("api/Games")]
+[ApiController]
+public class GamesController : ControllerBase
 {
-    [Route("api/Games")]
-    [ApiController]
-    public class GamesController : ControllerBase
+    private readonly IGameService _gameService;
+
+    public GamesController(IGameService gameService)
     {
-        private readonly TournamentContext _context;
-        private readonly IMapper _mapper;
-        // private readonly IGameRepository _gameRepository;
-        private readonly IUnitOfWork _uow;
+        _gameService = gameService;
+    }
 
-        public GamesController(TournamentContext context, IMapper mapper, IGameRepository gameRepository, IUnitOfWork uow)
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<GameDto>>> GetGames()
+    {
+        var games = await _gameService.GetGamesAsync();
+        return Ok(games);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<GameDto>> GetGame(int id)
+    {
+        try
         {
-            _context = context;
-            _mapper = mapper;
-            _uow = uow;
-            // _gameRepository = gameRepository;
+            var game = await _gameService.GetGameAsync(id.ToString());
+            return Ok(game);
         }
-
-        // GET: api/Games
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<GameDto>>> GetGame()
+        catch (KeyNotFoundException)
         {
-            var games = await _uow.GameRepository.GetAllAsync();
-            var gamesDto = _mapper.Map<IEnumerable<GameDto>>(games);
-
-            return Ok(gamesDto);
+            return NotFound("Game not found.");
         }
+    }
 
-        // GET: api/Games/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<GameDto>> GetGame(int id)
+    [HttpPost]
+    public async Task<ActionResult> PostGame([FromBody] GameDto createGameDto)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        await _gameService.PostGame(createGameDto);
+        return CreatedAtAction(nameof(GetGame), new { id = createGameDto.Id }, createGameDto);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> PutGame(int id, [FromBody] GameDto gameDto)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        try
         {
-            if (!await _uow.GameRepository.AnyAsync(id))
-            {
-                return NotFound();
-            }
-
-            var game = await _uow.GameRepository.GetAsync(id);
-            var gameDto = _mapper.Map<GameDto>(game);
-
-            return Ok(gameDto);
-        }
-
-        // PUT: api/Games/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutGame(int id, CreateGameDto createGameDto)
-        {
-            if (!await _uow.GameRepository.AnyAsync(id)) return NotFound();
-
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-
-
-            var game = await _uow.GameRepository.GetAsync(id);
-            _mapper.Map(createGameDto, game);
-
-            try
-            {
-                _uow.GameRepository.Update(game);
-                await _uow.SaveAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                throw;
-            }
-
+            await _gameService.PutGame(id, gameDto);
             return NoContent();
         }
-
-        // POST: api/Games
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<GameDto>> PostGame(CreateGameDto createGameDto)
+        catch (KeyNotFoundException)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            //var game = new Game
-            //{
-            //    Title = createGameDto.Title,
-            //    Time = createGameDto.Time,
-            //    Description = createGameDto.Description,
-            //    TournamentModelId = createGameDto.TournamentModelId
-            //};
-
-            var game = _mapper.Map<Game>(createGameDto);
-
-            if (await _uow.GameRepository.AnyAsync(game.Id))
-            {
-                return Conflict("A tournament with this ID already exists.");
-            }
-
-            try
-            {
-                _uow.GameRepository.Add(game);
-                await _uow.SaveAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return StatusCode(500, "An error occurred while saving the tournament.");
-                throw;
-            }
-
-
-            var gameDto = _mapper.Map<GameDto>(game);
-
-            return CreatedAtAction(nameof(GetGame), new { id = game.Id }, gameDto);
+            return NotFound("Game not found.");
         }
+    }
 
-
-        // DELETE: api/Games/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteGame(int id)
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteGame(int id)
+    {
+        try
         {
-            var game = await _uow.GameRepository.GetAsync(id);
-            if (game == null) return NotFound();
-            try
-            {
-                _uow.GameRepository.Remove(game);
-                await _uow.SaveAsync();
-
-                return NoContent();
-
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return StatusCode(500, "An error occurred while deleting the game.");
-            }
+            await _gameService.DeleteGame(id);
+            return NoContent();
         }
-
-
-        // Patch api/Games/5
-        [HttpPatch("{id:int}")]
-        public async Task<ActionResult> PatchGame(int id, JsonPatchDocument<CreateGameDto> patchDocument)
+        catch (KeyNotFoundException)
         {
-            if (patchDocument is null)
-                return BadRequest("No patch document");
-
-            if (!await _uow.GameRepository.AnyAsync(id))
-                return NotFound("The tournament does not exist in the database");
-
-            try
-            {
-                var gameModel = await _uow.GameRepository.GetAsync(id);
-
-                var dto = _mapper.Map<CreateGameDto>(gameModel);
-                patchDocument.ApplyTo(dto, ModelState);
-
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
-
-                _mapper.Map(dto, gameModel);
-
-                await _uow.SaveAsync();
-
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("EXCEPTION: " + ex.ToString());
-                return StatusCode(500, "An error occurred while processing the request.");
-            }
+            return NotFound("Game not found.");
         }
+    }
 
+    [HttpPatch("{id}")]
+    public async Task<IActionResult> PatchGame(int id, [FromBody] JsonPatchDocument<GameDto> patchDocument)
+    {
+        if (patchDocument == null) return BadRequest("Patch document cannot be null.");
+
+        try
+        {
+            await _gameService.PatchGame(id, patchDocument);
+            return NoContent();
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound("Game not found.");
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }
-
