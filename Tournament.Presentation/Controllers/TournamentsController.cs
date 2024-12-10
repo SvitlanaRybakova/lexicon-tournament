@@ -7,7 +7,7 @@ using AutoMapper;
 using Tournament.Core.DTOs.Tournament;
 using Microsoft.AspNetCore.JsonPatch;
 
-namespace Tournament.API.Controllers
+namespace Tournament.Presentation.Controllers
 {
     [Route("api/Tournaments")]
     [ApiController]
@@ -142,7 +142,7 @@ namespace Tournament.API.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                
+
                 _mapper.Map(dto, tournamentModel);
 
                 await _uow.SaveAsync();

@@ -8,7 +8,7 @@ using Tournament.Core.Repositories;
 using Microsoft.AspNetCore.JsonPatch;
 using Tournament.Core.DTOs.Tournament;
 
-namespace Tournament.API.Controllers
+namespace Tournament.Presentation.Controllers
 {
     [Route("api/Games")]
     [ApiController]
@@ -139,40 +139,40 @@ namespace Tournament.API.Controllers
         }
 
 
-            // Patch api/Games/5
-            [HttpPatch("{id:int}")]
-            public async Task<ActionResult> PatchGame(int id, JsonPatchDocument<CreateGameDto> patchDocument)
+        // Patch api/Games/5
+        [HttpPatch("{id:int}")]
+        public async Task<ActionResult> PatchGame(int id, JsonPatchDocument<CreateGameDto> patchDocument)
+        {
+            if (patchDocument is null)
+                return BadRequest("No patch document");
+
+            if (!await _uow.GameRepository.AnyAsync(id))
+                return NotFound("The tournament does not exist in the database");
+
+            try
             {
-                if (patchDocument is null)
-                    return BadRequest("No patch document");
+                var gameModel = await _uow.GameRepository.GetAsync(id);
 
-                if (!await _uow.GameRepository.AnyAsync(id))
-                    return NotFound("The tournament does not exist in the database");
+                var dto = _mapper.Map<CreateGameDto>(gameModel);
+                patchDocument.ApplyTo(dto, ModelState);
 
-                try
-                {
-                    var gameModel = await _uow.GameRepository.GetAsync(id);
-
-                    var dto = _mapper.Map<CreateGameDto>(gameModel);
-                    patchDocument.ApplyTo(dto, ModelState);
-
-                    if (!ModelState.IsValid)
-                        return BadRequest(ModelState);
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
 
-                    _mapper.Map(dto, gameModel);
+                _mapper.Map(dto, gameModel);
 
-                    await _uow.SaveAsync();
+                await _uow.SaveAsync();
 
-                    return NoContent();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("EXCEPTION: " + ex.ToString());
-                    return StatusCode(500, "An error occurred while processing the request.");
-                }
+                return NoContent();
             }
-
+            catch (Exception ex)
+            {
+                Console.WriteLine("EXCEPTION: " + ex.ToString());
+                return StatusCode(500, "An error occurred while processing the request.");
+            }
         }
+
+    }
 }
 

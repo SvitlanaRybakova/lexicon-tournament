@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -26,6 +26,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Tournament.Core\Tournament.Core.csproj" />
     <ProjectReference Include="..\Tournament.Data\Tournament.Data.csproj" />
+    <ProjectReference Include="..\Tournament.Presentation\Tournament.Presentation.csproj" />
+    <ProjectReference Include="..\Tournament.Services\Tournament.Services.csproj" />
+    <ProjectReference Include="..\TournamentContracts\Tournament.Contracts.csproj" />
   </ItemGroup>
 
 </Project>
